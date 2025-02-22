@@ -17,5 +17,8 @@ class ApibeanUtils:
         else:
             print(f"Error: { json.dumps(response.json(), indent=2) }")
 
-    def print_curl(self, request):
+    def print_curl(self, req_or_resp: httpx.Request|httpx.Response):
+        request = req_or_resp
+        if isinstance(req_or_resp, httpx.Response):
+            request = req_or_resp.request
         print(Curlify(request).to_curl())

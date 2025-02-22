@@ -1,6 +1,43 @@
 import json
 import re
 
+class ResponseWrapper:
+    def __init__(self, wrapped_object):
+        self._wrapped_object = wrapped_object
+
+    def __getattr__(self, name):
+        """Intercepts attribute access and forwards it to the wrapped object."""
+        return getattr(self._wrapped_object, name)
+
+    def __setattr__(self, name, value):
+        """Intercepts attribute assignment and forwards it to the wrapped object."""
+        if name == "_wrapped_object":
+            # Allow assignment of the wrapped object itself.
+            super().__setattr__(name, value)
+        else:
+            # Forward other assignments to the wrapped object.
+            setattr(self._wrapped_object, name, value)
+
+    def __getattribute__(self, name):
+        """Ensures that we don't loop into __getattr__."""
+        if name == "_wrapped_object":
+            return super().__getattribute__(name)
+        return getattr(self._wrapped_object, name)
+
+    def __repr__(self):
+        """Returns the representation of the wrapped object."""
+        return repr(self._wrapped_object)
+
+    def __str__(self):
+        """Returns the string representation of the wrapped object."""
+        return str(self._wrapped_object)
+
+    @property
+    def __class__(self):
+        """Preserves the class of the wrapped object."""
+        return self._wrapped_object.__class__
+
+
 class Curlify:
     DEFAULT_EXCLUDE_HEADERS = [
         "host",
@@ -28,7 +65,10 @@ class Curlify:
         Returns:
             str: string represents curl command
         """
-        quote = f"curl -X {self.req.method} {self.req.url} -H {self.headers()} -d '{self.decode_body()}'"
+        quote = f'curl -X {self.req.method} "{self.req.url}" -H {self.headers()}'
+        if self.req.method != 'GET':
+            quote = quote + f" -d '{self.decode_body()}'"
+
         parts = re.split(r'\s(?=-[dH])', quote)
 
         if self.compressed:

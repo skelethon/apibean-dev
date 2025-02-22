@@ -1,5 +1,8 @@
 from typing import Self
+
 import urllib.parse
+
+from .export import ResponseWrapper
 
 class Curli:
 
@@ -12,7 +15,7 @@ class Curli:
         self._session.globals(**kwargs)
         return self
 
-    def account(self, profile = None, **kwargs) -> Self:
+    def as_account(self, profile = None, **kwargs) -> Self:
         if profile is not None:
             self._account.profile = profile
         if "access_token" in kwargs:
@@ -20,7 +23,7 @@ class Curli:
             del kwargs["access_token"]
         return self
 
-    def context(self, profile = None, **kwargs) -> Self:
+    def in_session(self, profile = None, **kwargs) -> Self:
         if profile is not None:
             self._session.profile = profile
         if "base_url" in kwargs and kwargs["base_url"] is not None:
@@ -45,34 +48,37 @@ class Curli:
 
         return (url, args, dict(kwargs, headers=headers))
 
+    def _wrap_response(self, response):
+        return ResponseWrapper(response)
+
     def request(self, method, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.request(method, url, *args, **kwargs)
+        return self._wrap_response(self._invoker.request(method, url, *args, **kwargs))
 
     def get(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.get(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.get(url, *args, **kwargs))
 
     def head(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.head(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.head(url, *args, **kwargs))
 
     def options(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.options(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.options(url, *args, **kwargs))
 
     def post(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.post(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.post(url, *args, **kwargs))
 
     def put(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.put(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.put(url, *args, **kwargs))
 
     def patch(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.patch(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.patch(url, *args, **kwargs))
 
     def delete(self, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)
-        return self._invoker.delete(url, *args, **kwargs)
+        return self._wrap_response(self._invoker.delete(url, *args, **kwargs))

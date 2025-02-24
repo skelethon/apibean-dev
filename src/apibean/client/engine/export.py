@@ -60,6 +60,8 @@ class ResponseWrapper:
         return body.get(field_name)
 
     def capture_id_refs(self, name_of_id_refs:Optional[str] = None, name_of_key_field = "email"):
+        if not self._wrapped_object.is_success:
+            raise RuntimeError("The response is not sussess")
         if name_of_id_refs is None:
             name_of_id_refs = self._build_name_of_id_refs()
         if name_of_id_refs not in self._session_store:

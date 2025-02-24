@@ -1,8 +1,10 @@
 class ApibeanSpace():
     def __init__(self, profile="main"):
-        self._profile = profile
         self._globals = dict()
         self._storage = dict()
+        self._profile = profile
+        if self._profile:
+            self._storage[self._profile] = dict()
 
     @property
     def profile(self):
@@ -12,24 +14,36 @@ class ApibeanSpace():
     def profile(self, value):
         self._profile = value
 
+    @property
+    def profiles(self):
+        return list(self._storage.keys())
+
     def globals(self, **kwargs):
         self._globals.update(**kwargs)
 
-    def update(self, **kwargs):
+    def _get_storage_of_profile(self):
         if self._profile not in self._storage:
             self._storage[self._profile] = dict()
-        self._storage[self._profile].update(**kwargs)
+        return self._storage[self._profile]
+
+    def update(self, **kwargs):
+        self._get_storage_of_profile().update(**kwargs)
+
+    def __contains__(self, item):
+        return item in self._get_storage_of_profile()
 
     def __getitem__(self, key):
-        if self._profile not in self._storage:
-            self._storage[self._profile] = dict()
-        return self._storage[self._profile].get(key, self._globals.get(key, None))
+        return self._get_storage_of_profile().get(key, self._globals.get(key, None))
 
     def __setitem__(self, key, value):
-        if self._profile not in self._storage:
-            self._storage[self._profile] = dict()
-        self._storage[self._profile][key] = value
+        _storage = self._get_storage_of_profile()
+        _storage[key] = value
 
     def __delitem__(self, key):
-        if key in self._storage[self._profile]:
-            del self._storage[self._profile][key]
+        _storage = self._get_storage_of_profile()
+        if key in _storage:
+            del _storage[key]
+
+    def __getattr__(self, name):
+        """Intercepts attribute access and forwards it to the storage of current profile."""
+        return getattr(self._get_storage_of_profile(), name)

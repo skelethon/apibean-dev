@@ -49,7 +49,7 @@ class Curli:
         return (url, args, dict(kwargs, headers=headers))
 
     def _wrap_response(self, response):
-        return ResponseWrapper(response)
+        return ResponseWrapper(response, session_store=self._session, account_store=self._account)
 
     def request(self, method, url, *args, **kwargs):
         url, args, kwargs = self._build_request(url, *args, **kwargs)

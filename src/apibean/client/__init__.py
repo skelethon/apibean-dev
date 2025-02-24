@@ -1,12 +1,20 @@
 import httpx
 
+from .engine.agent import Agent
 from .engine.curli import Curli
 from .engine.space import ApibeanSpace
 from .engine.utils import ApibeanUtils
 
-session_store = ApibeanSpace()
-account_store = ApibeanSpace()
-curli = Curli(httpx, session_store=session_store, account_store=account_store)
+class Store:
+    session = ApibeanSpace(profile = "main")
+    account = ApibeanSpace(profile = "anon")
+
+store = Store()
+curli = Curli(httpx, session_store=store.session, account_store=store.account)
+agent = Agent(curli)
 utils = ApibeanUtils()
 
-box = session_store
+curli.globals(headers={
+    "accept": "application/json",
+    "Content-Type": "application/json",
+})

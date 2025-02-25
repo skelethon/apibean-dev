@@ -5,6 +5,7 @@ import httpx
 from .curli import Curli
 
 class Agent:
+    ACCOUNT_AUTH_FIELDS = ['id', 'email', 'access_token', 'refresh_token', 'expiration']
 
     def __init__(self, curli):
         self._curli = curli
@@ -43,12 +44,21 @@ class Agent:
 
         if r.status_code == httpx.codes.OK:
             body = r.json()
-            access_token = body.get("access_token", None)
-            if access_token is None:
-                raise RuntimeError("access_token not found")
-            self.as_account(access_token = access_token)
+            params = {key: body[key] for key in self.ACCOUNT_AUTH_FIELDS if key in body}
+            for field_name in ["id", "access_token"]:
+                self._check_available(params, field_name)
+            self.as_account(**params)
 
         return r
+
+    def _check_available(self, data, field_name):
+        if field_name not in data:
+            raise RuntimeError(f"{ field_name } not found")
+        field_value = data.get(field_name)
+        if field_value is None:
+            raise RuntimeError(f"{ field_name } is null")
+        if not field_value:
+            raise RuntimeError(f"{ field_name } is empty")
 
     def change_password(self, current_password, new_password, url:str = "auth/change_password", **kwargs):
         return self._curli.post(url,

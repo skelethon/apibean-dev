@@ -26,8 +26,8 @@ class ApibeanSpace():
             self._storage[self._profile] = dict()
         return self._storage[self._profile]
 
-    def update(self, **kwargs):
-        self._get_storage_of_profile().update(**kwargs)
+    def update(self, *args, **kwargs):
+        self._get_storage_of_profile().update(*args, **kwargs)
 
     def __contains__(self, item):
         return item in self._get_storage_of_profile()

@@ -18,17 +18,19 @@ class Curli:
     def as_account(self, profile = None, **kwargs) -> Self:
         if profile is not None:
             self._account.profile = profile
-        if "access_token" in kwargs:
-            self._account["access_token"] = kwargs["access_token"]
-            del kwargs["access_token"]
+        self._account.update(**kwargs)
         return self
 
     def in_session(self, profile = None, **kwargs) -> Self:
         if profile is not None:
             self._session.profile = profile
+
+        kwargs = dict(kwargs)
         if "base_url" in kwargs and kwargs["base_url"] is not None:
             self._session["base_url"] = kwargs["base_url"]
-            del kwargs["base_url"]
+        del kwargs["base_url"]
+        self._session.update(**kwargs)
+
         return self
 
     def _build_request(self, url, *args, headers = None, **kwargs):

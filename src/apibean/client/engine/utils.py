@@ -22,3 +22,11 @@ class ApibeanUtils:
         if isinstance(req_or_resp, httpx.Response):
             request = req_or_resp.request
         print(Curlify(request).to_curl())
+
+    def print_session_item(self, store, item_name):
+        item = store[item_name]
+        if isinstance(item, dict):
+            print(f'store.session["{ item_name }"]:')
+            self.print_json(item)
+        else:
+            print(f'store.session["{ item_name }"]: { item }')

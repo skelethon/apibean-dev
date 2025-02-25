@@ -50,6 +50,11 @@ class Agent:
 
         return r
 
+    def change_password(self, current_password, new_password, url:str = "auth/change_password", **kwargs):
+        return self._curli.post(url,
+                json=dict(current_password=current_password, new_password=new_password),
+                **kwargs)
+
     def logout(self, url:str = "auth/logout", **kwargs):
         r = self._curli.get(url, **kwargs)
         if r.status_code == httpx.codes.OK:

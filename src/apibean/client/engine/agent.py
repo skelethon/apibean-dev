@@ -5,6 +5,22 @@ import httpx
 from .curli import Curli
 
 class Agent:
+    """The Agent object class wraps some of the operations of authenticating users and 
+    switching between these accounts during interactions.
+
+    Properties:
+    - `ACCOUNT_AUTH_FIELDS`: The names of the fields containing user authentication
+        information of an account.
+        In which:
+
+        * id: Unique identifier of the user in the system (usually a UUID code).
+        * email: Unique email address of the user, this is also the login name.
+        * access_token: Access code according to the JWT protocol.
+        * refresh_token: Secret code used to refresh the access_token.
+        * expiration: Time when the access_token code expires. The access_token must
+            be refreshed before this time.
+    """
+
     ACCOUNT_AUTH_FIELDS = ['id', 'email', 'access_token', 'refresh_token', 'expiration']
 
     def __init__(self, curli):
@@ -21,7 +37,7 @@ class Agent:
     @property
     def _account(self):
         return getattr(self._curli, "_account")
-    
+
     @property
     def _session(self):
         return getattr(self._curli, "_session")

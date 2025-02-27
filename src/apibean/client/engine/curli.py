@@ -26,9 +26,10 @@ class Curli:
             self._session.profile = profile
 
         kwargs = dict(kwargs)
-        if "base_url" in kwargs and kwargs["base_url"] is not None:
-            self._session["base_url"] = kwargs["base_url"]
-        del kwargs["base_url"]
+        if "base_url" in kwargs:
+            if kwargs["base_url"] is not None:
+                self._session["base_url"] = kwargs["base_url"]
+            del kwargs["base_url"]
         self._session.update(**kwargs)
 
         return self

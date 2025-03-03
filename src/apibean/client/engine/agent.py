@@ -59,13 +59,16 @@ class Agent:
         r = self._curli.post(url, json = body, **kwargs)
 
         if r.status_code == httpx.codes.OK:
-            body = r.json()
-            params = {key: body[key] for key in self.ACCOUNT_AUTH_FIELDS if key in body}
-            for field_name in ["id", "access_token"]:
-                self._check_available(params, field_name)
-            self.as_account(**params)
+            self.as_account(**self._extract_cached(r))
 
         return r
+
+    def _extract_cached(self, r):
+        body = r.json()
+        params = {key: body[key] for key in self.ACCOUNT_AUTH_FIELDS if key in body}
+        for field_name in ["id", "access_token"]:
+            self._check_available(params, field_name)
+        return params
 
     def _check_available(self, data, field_name):
         if field_name not in data:
@@ -76,19 +79,32 @@ class Agent:
         if not field_value:
             raise RuntimeError(f"{ field_name } is empty")
 
-    def change_password(self, current_password, new_password, url:str = "auth/change_password", **kwargs):
+    def change_password(self, current_password, new_password, url:str = "auth/change-password", **kwargs):
         return self._curli.post(url,
                 json=dict(current_password=current_password, new_password=new_password),
                 **kwargs)
+
+    def refresh_token(self, url:str = "auth/refresh-token", **kwargs):
+        email = self._account.get("email")
+        if not email:
+            raise RuntimeError("email not found")
+
+        refresh_token = self._account.get("refresh_token")
+        if not refresh_token:
+            raise RuntimeError("refresh_token not found")
+
+        r = self._curli.post(url, json=dict(email=email, refresh_token=refresh_token), **kwargs)
+
+        if r.status_code == httpx.codes.OK:
+            self.as_account(**self._extract_cached(r))
+
+        return r
 
     def logout(self, url:str = "auth/logout", **kwargs):
         r = self._curli.get(url, **kwargs)
         if r.status_code == httpx.codes.OK:
             self.as_account(access_token = None)
         return r
-
-    def reset(self, url, *args, **kwargs):
-        ...
 
     def activate_user_id(self, user_id, password = None, url:str = "auth/activate", **kwargs):
         """Any user excepts anon & root could use this API to activate his account

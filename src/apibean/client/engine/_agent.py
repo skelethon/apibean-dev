@@ -2,7 +2,7 @@ from typing import Self
 
 import httpx
 
-from .curli import Curli
+from ._curli import Curli
 
 class Agent:
     """The Agent object class wraps some of the operations of authenticating users and 

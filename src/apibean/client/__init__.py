@@ -9,7 +9,7 @@ class Space:
 space = Space()
 curli = Curli(httpx, session_store=space.session, account_store=space.account)
 agent = Agent(curli)
-utils = Tools()
+tools = Tools()
 
 curli.globals(headers={
     "accept": "application/json",

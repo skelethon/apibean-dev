@@ -2,7 +2,7 @@ from typing import Self
 
 import urllib.parse
 
-from .export import ResponseWrapper
+from ._helpers import ResponseWrapper
 
 class Curli:
 

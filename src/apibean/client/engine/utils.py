@@ -3,7 +3,7 @@ import httpx
 
 from .export import Curlify
 
-class ApibeanUtils:
+class Tools:
 
     def print_json(self, data):
         print(json.dumps(data, indent=2))

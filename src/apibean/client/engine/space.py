@@ -1,4 +1,4 @@
-class ApibeanSpace():
+class Store():
     def __init__(self, profile="main"):
         self._globals = dict()
         self._storage = dict()

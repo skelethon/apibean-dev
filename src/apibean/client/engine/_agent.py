@@ -45,17 +45,15 @@ class Agent:
     def auth(self, *args, **kwargs):
         return self.login(*args, **kwargs)
 
-    def login(self, username = None, password = None, body = None, url:str = "auth/login", **kwargs):
-        body = dict() if not isinstance(body, dict) else body
+    def login(self, username = None, password = None, json = None, url:str = "auth/login", **kwargs):
+        body = json if isinstance(json, dict) else dict()
 
         if username:
             body['username'] = username
         if password:
             body['password'] = password
 
-        if kwargs:
-            kwargs = dict(filter(lambda item: item[0] != 'json', kwargs.items()))
-
+        kwargs = dict(filter(lambda item: item[0] != 'json', kwargs.items()))
         kwargs.update(access_token=None)
 
         r = self._curli.post(url, json = body, **kwargs)

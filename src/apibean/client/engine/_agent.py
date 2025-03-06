@@ -56,6 +56,8 @@ class Agent:
         if kwargs:
             kwargs = dict(filter(lambda item: item[0] != 'json', kwargs.items()))
 
+        kwargs.update(access_token=None)
+
         r = self._curli.post(url, json = body, **kwargs)
 
         if r.status_code == httpx.codes.OK:
@@ -116,5 +118,6 @@ class Agent:
         return self.activate(activation_code, password, url=url, **kwargs)
 
     def activate(self, activation_code, password = None, url:str = "auth/activate", **kwargs):
-        r = self._curli.post(url, json = dict(activation_code=activation_code, password=password), **kwargs)
+        r = self._curli.post(url, json = dict(activation_code=activation_code, password=password),
+                access_token=None, **kwargs)
         return r

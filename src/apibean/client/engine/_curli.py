@@ -45,9 +45,11 @@ class Curli:
         if isinstance(session_headers, dict):
             headers = {**headers, **session_headers}
 
-        access_token = self._account['access_token']
+        access_token = kwargs.get('access_token', self._account['access_token'])
         if isinstance(access_token, str) and access_token:
             headers = {**headers, "Authorization": f"Bearer {access_token}"}
+        if 'access_token' in kwargs:
+            del kwargs['access_token']
 
         return (url, args, dict(kwargs, headers=headers))
 

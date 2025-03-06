@@ -1,6 +1,8 @@
+from ._decorators import deprecated
+
 class Store():
     def __init__(self, profile="main"):
-        self._globals = dict()
+        self._default = dict()
         self._storage = dict()
         self._profile = profile
         if self._profile:
@@ -18,8 +20,12 @@ class Store():
     def profiles(self):
         return list(self._storage.keys())
 
+    @deprecated
     def globals(self, **kwargs):
-        self._globals.update(**kwargs)
+        self.default(**kwargs)
+
+    def default(self, **kwargs):
+        self._default.update(**kwargs)
 
     def _get_storage_of_profile(self):
         if self._profile not in self._storage:
@@ -33,7 +39,7 @@ class Store():
         return item in self._get_storage_of_profile()
 
     def __getitem__(self, key):
-        return self._get_storage_of_profile().get(key, self._globals.get(key, None))
+        return self._get_storage_of_profile().get(key, self._default.get(key, None))
 
     def __setitem__(self, key, value):
         _storage = self._get_storage_of_profile()

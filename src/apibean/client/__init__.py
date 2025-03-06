@@ -11,7 +11,7 @@ curli = Curli(httpx, session_store=space.session, account_store=space.account)
 agent = Agent(curli)
 tools = Tools()
 
-curli.globals(headers={
+curli.default(headers={
     "accept": "application/json",
     "Content-Type": "application/json",
 })

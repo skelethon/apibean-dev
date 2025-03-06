@@ -2,6 +2,7 @@ from typing import Self
 
 import urllib.parse
 
+from ._decorators import deprecated
 from ._helpers import ResponseWrapper
 
 class Curli:
@@ -11,8 +12,12 @@ class Curli:
         self._session = session_store
         self._account = account_store
 
+    @deprecated
     def globals(self, **kwargs) -> Self:
-        self._session.globals(**kwargs)
+        return self.default(**kwargs)
+
+    def default(self, **kwargs) -> Self:
+        self._session.default(**kwargs)
         return self
 
     def as_account(self, profile = None, **kwargs) -> Self:

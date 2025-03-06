@@ -35,8 +35,9 @@ class Curli:
         return self
 
     def _build_request(self, url, *args, headers = None, **kwargs):
-        if not url.startswith('http') and self._session['base_url']:
-            url = urllib.parse.urljoin(self._session['base_url'] + '/', url.lstrip('/'))
+        base_url = kwargs.get('base_url', self._session['base_url'])
+        if not url.startswith('http') and base_url:
+            url = urllib.parse.urljoin(base_url + '/', url.lstrip('/'))
 
         if not isinstance(headers, dict):
             headers = {}

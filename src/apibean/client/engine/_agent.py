@@ -2,7 +2,19 @@ from typing import Self
 
 import httpx
 
+from ._consts import JF_BASE_URL
+from ._consts import JF_USERNAME
+from ._consts import JF_PASSWORD
+from ._consts import JF_ACTIVATION_CODE
+from ._consts import JF_ID
+from ._consts import JF_EMAIL
+from ._consts import JF_ACCESS_TOKEN
+from ._consts import JF_REFRESH_TOKEN
+from ._consts import JF_EXPIRATION
+
 from ._curli import Curli
+from ._decorators import deprecated
+from ._utils import to_datetime, get_now
 
 class Agent:
     """The Agent object class wraps some of the operations of authenticating users and 
@@ -21,7 +33,7 @@ class Agent:
             be refreshed before this time.
     """
 
-    ACCOUNT_AUTH_FIELDS = ['id', 'email', 'access_token', 'refresh_token', 'expiration']
+    ACCOUNT_AUTH_FIELDS = [JF_ID, JF_EMAIL, JF_ACCESS_TOKEN, JF_REFRESH_TOKEN, JF_EXPIRATION]
 
     def __init__(self, curli):
         self._curli = curli
@@ -42,6 +54,21 @@ class Agent:
     def _session(self):
         return getattr(self._curli, "_session")
 
+    def is_authenticated(self):
+        for required_field in [JF_ACCESS_TOKEN, JF_REFRESH_TOKEN, JF_EXPIRATION]:
+            if required_field not in self._account:
+                return False
+        return True
+
+    def is_still_valid(self):
+        if not self.is_authenticated():
+            return None
+        expires = to_datetime(self._account.get(JF_EXPIRATION))
+        if expires <= get_now():
+            return False
+        return True
+
+    @deprecated
     def auth(self, *args, **kwargs):
         return self.login(*args, **kwargs)
 
@@ -49,9 +76,9 @@ class Agent:
         body = json if isinstance(json, dict) else dict()
 
         if username:
-            body['username'] = username
+            body[JF_USERNAME] = username
         if password:
-            body['password'] = password
+            body[JF_PASSWORD] = password
 
         kwargs = dict(filter(lambda item: item[0] != 'json', kwargs.items()))
         kwargs.update(access_token=None)
@@ -66,7 +93,7 @@ class Agent:
     def _extract_cached(self, r):
         body = r.json()
         params = {key: body[key] for key in self.ACCOUNT_AUTH_FIELDS if key in body}
-        for field_name in ["id", "access_token"]:
+        for field_name in [JF_ID, JF_ACCESS_TOKEN]:
             self._check_available(params, field_name)
         return params
 
@@ -85,13 +112,13 @@ class Agent:
                 **kwargs)
 
     def refresh_token(self, url:str = "auth/refresh-token", **kwargs):
-        email = self._account.get("email")
+        email = self._account.get(JF_EMAIL)
         if not email:
-            raise RuntimeError("email not found")
+            raise RuntimeError(f"{ JF_EMAIL } not found")
 
-        refresh_token = self._account.get("refresh_token")
+        refresh_token = self._account.get(JF_REFRESH_TOKEN)
         if not refresh_token:
-            raise RuntimeError("refresh_token not found")
+            raise RuntimeError(f"{ JF_REFRESH_TOKEN } not found")
 
         r = self._curli.post(url, json=dict(email=email, refresh_token=refresh_token), **kwargs)
 
@@ -112,7 +139,7 @@ class Agent:
         backup_profile = self._account.profile
         user_response = self._curli.as_account("root").get("user/" + user_id)
         self._curli.as_account(backup_profile)
-        activation_code = user_response.json().get("activation_code")
+        activation_code = user_response.json().get(JF_ACTIVATION_CODE)
         return self.activate(activation_code, password, url=url, **kwargs)
 
     def activate(self, activation_code, password = None, url:str = "auth/activate", **kwargs):

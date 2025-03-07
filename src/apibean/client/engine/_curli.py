@@ -5,6 +5,9 @@ import urllib.parse
 from ._decorators import deprecated
 from ._helpers import ResponseWrapper
 
+from ._consts import JF_BASE_URL
+from ._consts import JF_ACCESS_TOKEN
+
 class Curli:
 
     def __init__(self, invoker, session_store, account_store):
@@ -31,16 +34,16 @@ class Curli:
             self._session.profile = profile
 
         kwargs = dict(kwargs)
-        if "base_url" in kwargs:
-            if kwargs["base_url"] is not None:
-                self._session["base_url"] = kwargs["base_url"]
-            del kwargs["base_url"]
+        if JF_BASE_URL in kwargs:
+            if kwargs[JF_BASE_URL] is not None:
+                self._session[JF_BASE_URL] = kwargs[JF_BASE_URL]
+            del kwargs[JF_BASE_URL]
         self._session.update(**kwargs)
 
         return self
 
     def _build_request(self, url, *args, headers = None, **kwargs):
-        base_url = kwargs.get('base_url', self._session['base_url'])
+        base_url = kwargs.get(JF_BASE_URL, self._session[JF_BASE_URL])
         if not url.startswith('http') and base_url:
             url = urllib.parse.urljoin(base_url + '/', url.lstrip('/'))
 
@@ -51,11 +54,11 @@ class Curli:
         if isinstance(session_headers, dict):
             headers = {**headers, **session_headers}
 
-        access_token = kwargs.get('access_token', self._account['access_token'])
+        access_token = kwargs.get(JF_ACCESS_TOKEN, self._account[JF_ACCESS_TOKEN])
         if isinstance(access_token, str) and access_token:
             headers = {**headers, "Authorization": f"Bearer {access_token}"}
-        if 'access_token' in kwargs:
-            del kwargs['access_token']
+        if JF_ACCESS_TOKEN in kwargs:
+            del kwargs[JF_ACCESS_TOKEN]
 
         return (url, args, dict(kwargs, headers=headers))
 

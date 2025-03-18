@@ -2,7 +2,6 @@ from typing import Optional
 from functools import reduce
 
 import json
-import httpx
 import re
 
 class ResponseWrapper:
@@ -61,6 +60,7 @@ class ResponseWrapper:
 
     def capture_id_refs(self, name_of_id_refs:Optional[str] = None, name_of_key_field = "email"):
         if not self._wrapped_object.is_success:
+            self.print()
             raise RuntimeError("The response is not sussess")
         if name_of_id_refs is None:
             name_of_id_refs = self._build_name_of_id_refs()
@@ -91,7 +91,7 @@ class ResponseWrapper:
 
     def print(self, details: bool = False):
         response = self._wrapped_object
-        if response.status_code == httpx.codes.OK:
+        if response.is_success:
             print(response)
         else:
             print(response)

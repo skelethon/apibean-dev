@@ -1,7 +1,5 @@
 from typing import Self
 
-import httpx
-
 from ._consts import JF_BASE_URL
 from ._consts import JF_USERNAME
 from ._consts import JF_PASSWORD
@@ -85,7 +83,7 @@ class Agent:
 
         r = self._curli.post(url, json = body, **kwargs)
 
-        if r.status_code == httpx.codes.OK:
+        if r.is_success:
             self.as_account(**self._extract_cached(r))
 
         return r
@@ -122,14 +120,14 @@ class Agent:
 
         r = self._curli.post(url, json=dict(email=email, refresh_token=refresh_token), **kwargs)
 
-        if r.status_code == httpx.codes.OK:
+        if r.is_success:
             self.as_account(**self._extract_cached(r))
 
         return r
 
     def logout(self, url:str = "auth/logout", **kwargs):
         r = self._curli.get(url, **kwargs)
-        if r.status_code == httpx.codes.OK:
+        if r.is_success:
             self.as_account(access_token = None)
         return r
 

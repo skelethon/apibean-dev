@@ -27,6 +27,11 @@ class Store():
     def default(self, **kwargs):
         self._default.update(**kwargs)
 
+    def reset(self):
+        self._storage = dict()
+        if self._profile:
+            self._storage[self._profile] = dict()
+
     def _get_storage_of_profile(self):
         if self._profile not in self._storage:
             self._storage[self._profile] = dict()

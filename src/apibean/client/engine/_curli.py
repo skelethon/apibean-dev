@@ -7,13 +7,22 @@ from ._helpers import ResponseWrapper
 
 from ._consts import JF_BASE_URL
 from ._consts import JF_ACCESS_TOKEN
+from ._store import Store
 
 class Curli:
 
-    def __init__(self, invoker, session_store, account_store):
+    def __init__(self, invoker, session_store: Store, account_store: Store):
         self._invoker = invoker
         self._session = session_store
         self._account = account_store
+
+    @property
+    def invoker(self):
+        return self._invoker
+
+    @invoker.setter
+    def invoker(self, value):
+        self._invoker = value
 
     @deprecated
     def globals(self, **kwargs) -> Self:

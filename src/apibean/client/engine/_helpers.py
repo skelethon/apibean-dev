@@ -4,6 +4,8 @@ from functools import reduce
 import json
 import re
 
+from ._consts import HK_REQUEST_ID
+
 class ResponseWrapper:
     def __init__(self, wrapped_object, session_store, account_store):
         self._wrapped_object = wrapped_object
@@ -88,6 +90,16 @@ class ResponseWrapper:
         else:
             items = [ resp_body ]
         return items
+
+    def get_request_id(self, from_response=False):
+        if from_response:
+            headers = self._wrapped_object.headers
+        else:
+            headers = self._wrapped_object.request.headers
+        return headers.get(HK_REQUEST_ID.lower(), None)
+
+    def get_request_id_pair(self):
+        return self.get_request_id(), self.get_request_id(from_response=True)
 
     def print(self, details: bool = False):
         response = self._wrapped_object

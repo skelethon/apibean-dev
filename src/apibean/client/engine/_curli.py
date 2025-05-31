@@ -1,13 +1,15 @@
 from typing import Self
-
+from uuid import uuid4
 import urllib.parse
-
-from ._decorators import deprecated
-from ._helpers import ResponseWrapper
 
 from ._consts import JF_BASE_URL
 from ._consts import JF_ACCESS_TOKEN
+from ._consts import HK_AUTHORIZATION
+from ._consts import HK_REQUEST_ID
+from ._decorators import deprecated
+from ._helpers import ResponseWrapper
 from ._store import Store
+from ._utils import normalize_header
 
 class Curli:
 
@@ -59,15 +61,20 @@ class Curli:
         if not isinstance(headers, dict):
             headers = {}
 
+        # normalize request headers and apply default header values
+        headers = normalize_header(headers, HK_REQUEST_ID)
+
         session_headers = self._session['headers']
         if isinstance(session_headers, dict):
-            headers = {**headers, **session_headers}
+            headers = {**session_headers, **headers}
 
         access_token = kwargs.get(JF_ACCESS_TOKEN, self._account[JF_ACCESS_TOKEN])
-        if isinstance(access_token, str) and access_token:
-            headers = {**headers, "Authorization": f"Bearer {access_token}"}
+        if access_token and isinstance(access_token, str):
+            headers = {HK_AUTHORIZATION: f"Bearer {access_token}", **headers}
         if JF_ACCESS_TOKEN in kwargs:
             del kwargs[JF_ACCESS_TOKEN]
+
+        headers = {HK_REQUEST_ID: str(uuid4()), **headers}
 
         return (url, args, dict(kwargs, headers=headers))
 

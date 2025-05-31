@@ -8,3 +8,6 @@ JF_ACTIVATION_CODE = 'activation_code'
 JF_ACCESS_TOKEN = 'access_token'
 JF_REFRESH_TOKEN = 'refresh_token'
 JF_EXPIRATION = 'expiration'
+
+HK_AUTHORIZATION = 'Authorization'
+HK_REQUEST_ID = 'X-Request-Id'.lower()
